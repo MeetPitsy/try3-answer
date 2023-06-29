@@ -2,7 +2,6 @@ streamlit
 pandas
 emoji
 requests
-json
 deta==1.0.1
 
 

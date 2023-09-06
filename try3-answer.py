@@ -1,13 +1,10 @@
+import requests
 import os
 import json
 import streamlit as st
 import pandas as pd
 import emoji
-from deta import Deta
-
-# Initialize Deta with your project key
-deta = Deta('b0u5qbektag_2v3XHsha7iGaJ99d5Rrbv3X4StgkGQJ2')
-db = deta.Base('pitsy')  # use 'pitsy' as your database name
+from deta import Deta 
 
 def home_page():
     st.title(emoji.emojize('Welcome to CPG Brand - Manufacturer Matching App :factory:'))
@@ -17,21 +14,17 @@ def home_page():
     if st.button('Let\'s go!'):
         st.session_state.page += 1
 
-    st.write('This app helps CPG brands find the perfect contract manufacturer.')
-    if st.button('Let\'s go!'):
-        st.session_state.page += 1
-
 def load_data():
     manufacturers = pd.DataFrame({
-        'Name': ['Gar Labs', 'Lily\'s', 'Beauty Private Label', 'Federal Packaging', 'Twincraft', 
+        'Name': ['Gar Labs', 'Pitsy Automation', 'Lily\'s', 'Beauty Private Label', 'Federal Packaging', 'Twincraft', 
                  'Coughlin Companies', 'Sinoscan', 'KKT', 'Goodkind Co', 'Botanic Beauty Labs', 
-                 'Essential Wholesale', 'Genie Supply', 'Glow Essential Labs', 'Pitsy Automation'],
-        'MOQ': [5000, 10000, 3000, 5000, 15000, 5000, 10000, 5000, 10000, 1000, 1000, None, 500, 0],
-        'Time': [14, 16, 12, 15, 20, 14, 16, 15, 17, None, None, None, None, 3],
-        'Price_per_unit': [2.00, 5.50, 4.50, 5.00, 2.50, 4.50, 3.50, 5.00, 3.00, 4.50, None, None, 3.00, 1.50],
-        'Email': ['tom@garlabs.com', 'hello@moesgroup.org', 'Sales@bqgmanufacturing.com', 'info@federalpackage.com', 
+                 'Essential Wholesale', 'Genie Supply', 'Glow Essential Labs'],
+        'MOQ': [5000, 0, 10000, 3000, 5000, 15000, 5000, 10000, 5000, 10000, 1000, 1000, 1500, 500],
+        'Time': [14, 0.125, 16, 12, 15, 20, 14, 16, 15, 17, 15, 17, 17, 10],
+        'Price_per_unit': [2.00, 1.49, 5.50, 4.50, 5.00, 2.50, 4.50, 3.50, 5.00, 3.00, 4.50, 3.49, 4.00, 3.00],
+        'Email': ['tom@garlabs.com', 'hello@meetpitsy.com', 'hello@moesgroup.org', 'Sales@bqgmanufacturing.com', 'info@federalpackage.com', 
                   'jackson.berman@twincraft.com', 'info@contactcoghlin.com', 'info@sinoscan.com', 'krupa@kktconsultants.com', 
-                  'info@nutracapusa.com', None, None, None, None, 'hello@meetpitsy.com'],
+                  'info@nutracapusa.com', None, None, None, None],
         'Comments': ['Best so far, we have to provide packaging, and transport for shipping...', 
                      None, None, 'Injection molding, customer supplied containers, labeling, screen printing',
                      'Base strategy of library of formulas that are then customized. Small handful of bases ready to be scaled up.',
@@ -42,10 +35,12 @@ def load_data():
 
 def post_to_deta(data):
     try:
-        response = db.insert(data)  # Save the response from db.insert()
+        # Deta Base uses 'put' method to store data
+        response = base.put(data['records'][0]['fields'])
         return response
     except Exception as e:
-        st.error(e)    
+        st.error(f"An Error occurred: {e}")
+        ...
 
 def input_company_info():
     st.title(emoji.emojize('Enter Your Company Information :memo:'))
@@ -65,26 +60,36 @@ def input_company_info():
 
     if st.button('Submit'):
         data = {
-            "Company Name": company_name,
-            "Product Type": product_type,
-            "Segment": segment,
-            "Annual Units": annual_units,
-            "Website URL": website_url,
-            "Revenue Last Year": revenue_last_year,
-            "Price Per Unit": price_per_unit,
-            "Projected Revenue": projected_revenue,
-            "Ideal Monthly Units": ideal_monthly_units,
-            "Monthly Units Sold": monthly_units_sold,
-            "Company Differentiation": differentiation,
-            "Monthly Revenue": monthly_revenue,
-            "Monthly Expense": monthly_expense
+            "records": [
+                {
+                    "fields": {
+                        "Company Name": company_name,
+                        "Product Type": product_type,
+                        "Segment": segment,
+                        "Annual Units": annual_units,
+                        "Website URL": website_url,
+                        "Revenue Last Year": revenue_last_year,
+                        "Price Per Unit": price_per_unit,
+                        "Projected Revenue": projected_revenue,
+                        "Ideal Monthly Units": ideal_monthly_units,
+                        "Monthly Units Sold": monthly_units_sold,
+                        "Company Differentiation": differentiation,
+                        "Monthly Revenue": monthly_revenue,
+                        "Monthly Expense": monthly_expense
+                    }
+                }
+            ]
         }
-        try:
-            response = post_to_deta(data)  # Save the response from post_to_deta()
+        response = post_to_deta(data)
+        if response:  
             st.success(emoji.emojize('Company Info Saved Successfully! :white_check_mark:'))
             st.session_state.page += 1
-        except Exception as e:
-            st.error(e)
+        else:
+            st.error('Something went wrong. Please try again.')
+
+        # Get your project key from Deta Base dashboard
+deta = Deta("b0u5qbektag_2v3XHsha7iGaJ99d5Rrbv3X4StgkGQJ2")  
+base = deta.Base("pitsy")
 
 def choose_criteria():
     st.title(emoji.emojize('Choose Your Main Criteria for Manufacturer Selection :mag:'))

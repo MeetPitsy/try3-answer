@@ -11,9 +11,11 @@ db = deta.Base('pitsy')  # use 'pitsy' as your database name
 
 def home_page():
     st.title(emoji.emojize('Welcome to CPG Brand - Manufacturer Matching App :factory:'))
-    # try3-answer
     # Add an image
     st.image('/Users/seanjenkins/desktop/myproject/3-answer/Automation2.jpg', caption='At-Home autonomous CPG manufacturing & 3pl fulfillment center', use_column_width=True)
+    st.write('This app helps CPG brands find the perfect contract manufacturer.')
+    if st.button('Let\'s go!'):
+        st.session_state.page += 1
 
     st.write('This app helps CPG brands find the perfect contract manufacturer.')
     if st.button('Let\'s go!'):

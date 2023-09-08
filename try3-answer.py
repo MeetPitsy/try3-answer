@@ -8,7 +8,6 @@ from deta import Deta
 
 def home_page():
     st.title(emoji.emojize('Welcome to CPG Brand - Manufacturer Matching App :factory:'))
-    # Add an image
     st.image('Automation2.jpg', caption='At-Home autonomous CPG manufacturing & 3pl fulfillment center', use_column_width=True)
     st.write('This app helps CPG brands find the perfect contract manufacturer.')
     if st.button('Let\'s go!'):
